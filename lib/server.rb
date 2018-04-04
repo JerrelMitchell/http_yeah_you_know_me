@@ -5,10 +5,11 @@ class Server
   include ServerMessages
   attr_reader :server, :connection, :lines
   def initialize(port)
-    @server     = TCPServer.new(port)
-    @connection = 'off'
-    @lines      = []
-    @count      = 0
+    @server        = TCPServer.new(port)
+    @connection    = 'off'
+    @lines         = []
+    @response      = []
+    @count         = 0
   end
 
   def connect
@@ -23,6 +24,10 @@ class Server
     end
   end
 
+  def analyze(lines)
+    @analyzed_lines = Analyzer.new(lines)
+  end
+
   def close
     @connection.close
   end
@@ -35,23 +40,30 @@ class Server
     loop do
       connect
       request_lines(connection)
+      add_request
+      # analyze(lines)
       connection.puts headers
       connection.puts hello_response
-      connection.puts requested_info
+      # connection.puts diagnostic_info
+      # route_response
       close
-      add_request
     end
   end
 
   def path_conditional(path)
+  end
+
+  def route_response
     if path == '/'
       requested_info
     elsif path == '/hello'
       hello_response
     elsif path == '/datetime'
-      "datetime 11:07AM on Sunday, November 1, 2015"
+      Time.now.strftime('%I:%M%p on %A, %B %d, %Y')
     elsif path == '/shutdown'
       "Total Requests: #{@count}" && exit
+    else
+      "404 Page Not Found"
     end
   end
 
