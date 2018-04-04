@@ -1,53 +1,62 @@
 require 'socket'
 
 class Server
-  attr_reader :client, :socket, :lines
-  def initialize
-    @client  = client
-    @socket  = socket
-    @lines   = []
+  attr_reader :server, :connection, :lines
+  def initialize(port)
+    @server        = TCPServer.new(port)
+    @connection    = connection
+    @lines         = []
+    @count = 0
   end
 
-  def start(port_number)
-    @client  = TCPServer.new(port_number)
-    @socket  = client.accept
+  def request_lines(connection)
+    line = connection.gets.chomp
+    until line.empty?
+      line = connection.gets.chomp
+      @lines << line
+    end
   end
 
-  def request_lines
-    line = socket.gets until line.chomp.empty?
-    @lines << line.chomp
+  def connect
+    @connection = server.accept
   end
 
-  def hello_response(request_count)
-    "Hello World! (#{request_count})\n"
+  def close
+    @connection.close
   end
 
-  def response(info)
-    "<pre>#{info}</pre>"
+  def add_request
+    @count += 1
   end
 
-  def add_output(output)
-    "<html><head></head><body>#{output}</body></html>"
+  def hello_response
+    "\nHello World! (#{@count})"
   end
 
-  def headers(content)
-    ["http/1.1 200 ok",
-     "date: #{Time.now.strftime('%a, %e %b %Y %H:%M:%S %z')}",
-     'server: ruby',
-     'content-type: text/html; charset=iso-8859-1',
-     "content-length: #{content.length}\r\n\r\n"]
+  def headers
+    ['http/1.1 200 ok']
   end
 
-  def footers
-    "<pre>
-    Verb: POST\n
-    Path: /\n
-    Protocol: HTTP/1.1\n
-    Host: 127.0.0.1\n
-    Port: 9292\n
-    Origin: 127.0.0.1\n
-    Accept: text/html,application/xhtml+xml,application/xml;q=0.9,"\
-    "image/webp,*/*;q=0.8\n
-    </pre>"
+  def requested_info
+    %(Verb: POST\n
+      Path: /\n
+      Protocol: HTTP/1.1\n
+      Host: 127.0.0.1\n
+      Port: 9292\n
+      Origin: 127.0.0.1\n
+      Accept: text/html,application/xhtml+xml,application/xml;q=0.9\n
+      image/webp,*/*;q=0.8\n)
+  end
+
+  def server_loop
+    loop do
+      connect
+      request_lines(connection)
+      connection.puts headers
+      connection.puts hello_response
+      connection.puts requested_info
+      close
+      add_request
+    end
   end
 end
