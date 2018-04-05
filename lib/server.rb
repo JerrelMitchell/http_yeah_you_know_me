@@ -1,6 +1,8 @@
 require 'socket'
 require './lib/router'
 
+# Handles loops to keep server running until force closed or from input
+# by router/output. Also feeds lines to router.
 class Server
   attr_reader :lines, :server, :client, :router, :closed
   alias :closed? closed

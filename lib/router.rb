@@ -1,5 +1,8 @@
 require './lib/output'
 
+# Takes user input and splits it into an array. That information then gets
+# directed/routed depending on verb (get/post). Then, depending on 'path' input,
+# the user is given output.
 class Router
   attr_reader :server, :output
   def initialize(server)

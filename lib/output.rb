@@ -1,5 +1,7 @@
 require './lib/game'
 
+# Contains all methods for output to user screen for get and post requests from
+# router class. Also holds information for current time and dictionary.
 class Output
   attr_reader :server, :count, :hello_count, :game_count,
               :message, :status_code, :current_time, :dictionary
@@ -107,8 +109,8 @@ class Output
   end
 
   def game_error_message
-    %(You have not started a game, or you have not made any guesses.
-      Please start a game by posting to the path '/start_game'.)
+    %(You haven't started a game, or haven't made any guesses.
+      Start a game by posting to the path '/start_game'.)
   end
 
   def content_length

@@ -1,3 +1,6 @@
+# Generates a random number and requests user to guess said number.
+# Compares both numbers, then outputs messages based on whether guess was
+# too low, too high, or just right.
 class Game
   attr_reader :rand_num, :output
   def initialize(server)
