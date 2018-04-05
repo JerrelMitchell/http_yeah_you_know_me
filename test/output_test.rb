@@ -37,8 +37,8 @@ class OutputTest < Minitest::Test
   end
 
   def test_it_gives_an_error_if_game_was_not_started_before_guessing
-    expected = %(You have not started a game, or you have not made any guesses.
-      Please start a game by posting to the path '/start_game'.)
+    expected = %(You haven't started a game, or haven't made any guesses.
+      Start a game by posting to the path '/start_game'.)
     assert_equal expected, output.game_error_message
   end
 end
