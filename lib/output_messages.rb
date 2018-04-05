@@ -77,4 +77,53 @@ class OutputMessages
     end
     output
   end
+
+  def start_game
+    @status_code = '301 Moved Permanently' if game.nil?
+    @game        = Game.new(server)
+    @message     = 'Good luck!'
+    client_outputs
+  end
+
+  def request_guess
+    @message = 'Enter a valid whole number between 0 and 100...'
+  end
+
+  def correct_guess(guess)
+    @message = "#{guess} was a good guess. You win! Congratulations!"
+  end
+
+  def guess_too_high(guess)
+    @message = "#{guess}? Too high. Try again."
+  end
+
+  def guess_too_low(guess)
+    @message = "#{guess}? Too low. Try again."
+  end
+
+  def error_message
+    %(You have not started a game, or you have not made any guesses.
+      Please start a game by posting to the path '/start_game'.)
+  end
+
+  def content_length
+    server.lines.find do |line|
+      line.include?('Content')
+    end.split(' ')[1].to_i
+  end
+
+  def record_guess
+    @status_code = '200 OK'
+    @game_count += 1
+    guess        = server.client.read(content_length)
+    input        = guess.split[-2].to_i
+    @game.compare_numbers(input)
+  end
+
+  def game_info
+    @status_code = '200 OK'
+    @message     = error_message if @game_count.zero?
+    @message     = "You have made #{@game_count} guesses."
+    client_outputs
+  end
 end
