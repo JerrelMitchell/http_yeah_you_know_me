@@ -15,13 +15,21 @@ class Router
     server.lines[0].split[1]
   end
 
+  def word
+    path.split('=')[1]
+  end
+
   def verb_router
     known_post_path? if find_verb == 'POST'
     known_get_path?  if find_verb == 'GET'
   end
 
-  def word
-    path.split('=')[1]
+  def known_get_path?
+    if path.include?('/')
+      output_for_get_path
+    else
+      output.unknown_path_message
+    end
   end
 
   def output_for_get_path
@@ -33,14 +41,9 @@ class Router
     output.game_info         if path == '/game'
   end
 
-  def known_get_path?
-    if path == '/' ||
-       path == '/hello' ||
-       path == '/datetime' ||
-       path == '/shutdown' ||
-       path == '/game' ||
-       path.start_with?('/word_search')
-      output_for_get_path
+  def known_post_path?
+    if path == '/start_game' || path == '/game'
+      output_for_post_path
     else
       output.unknown_path_message
     end
@@ -53,14 +56,6 @@ class Router
       output.record_guess
     else
       output.error_message
-    end
-  end
-
-  def known_post_path?
-    if path == '/start_game' || path == '/game'
-      output_for_post_path
-    else
-      output.unknown_path_message
     end
   end
 end
