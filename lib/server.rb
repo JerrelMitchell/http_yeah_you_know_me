@@ -3,11 +3,13 @@ require './lib/router'
 
 class Server
   attr_reader :lines, :server, :client, :router, :closed
+  alias :closed? closed
   def initialize(port)
     @server = TCPServer.new(port)
     @router = Router.new(self)
     @client = nil
     @closed = false
+    @lines  = []
   end
 
   def start
