@@ -1,10 +1,11 @@
-require './lib/server'
 require './lib/game'
 
-class OutputMessages
-  attr_reader :server, :hello_count, :game_count, :message, :status_code
+class Output
+  attr_reader :server, :count, :hello_count, :game_count,
+              :message, :status_code
   def initialize(server)
     @server      = server
+    @count       = 0
     @hello_count = 0
     @game_count  = 0
     @game        = nil
@@ -13,12 +14,9 @@ class OutputMessages
   end
 
   def client_outputs
+    @count += 1
     server.client.puts headers
     server.client.puts debug_information
-  end
-
-  def current_time
-    Time.now.strftime('%l:%M%p on %A, %B %-d, %Y.')
   end
 
   def headers
@@ -31,11 +29,15 @@ class OutputMessages
     client_outputs
   end
 
-  def hello_world_message
+  def hello_message
     @status_code  = '200 OK'
     @hello_count += 1
     @message      = "Hello, World! (#{hello_count})"
     client_outputs
+  end
+
+  def current_time
+    Time.now.strftime('%l:%M%p on %A, %B %-d, %Y.')
   end
 
   def datetime_message
@@ -47,8 +49,8 @@ class OutputMessages
   def shutdown_message
     @status_code = '200 OK'
     @message     = "Total Requests: #{count}"
-    server.close = true
     client_outputs
+    server.close = true
   end
 
   def unknown_path_message
@@ -67,26 +69,35 @@ class OutputMessages
     Origin:   #{server.lines[1].split[1].split(':')[0]})
   end
 
-  def word_search
+  def dictionary
+    File.read('/usr/share/dict/words')
+  end
+
+  def word_error_message
+    'Invalid input. Search by typing in /word_search=your_word_here'
+  end
+
+  def word_search(word)
     @status_code = '200 OK'
-    word = path.split('=')[1]
-    if File.read('/usr/share/dict/words').include?(word)
+    if word.nil?
+      @message = word_error_message
+    elsif dictionary.include?(word)
       @message = "#{word.upcase} is a known word."
     else
       @message = "#{word.upcase} is not a known word."
     end
-    output
+    client_outputs
   end
 
   def start_game
-    @status_code = '301 Moved Permanently' if game.nil?
+    @status_code = '301 Moved Permanently' if @game.nil?
     @game        = Game.new(server)
     @message     = 'Good luck!'
     client_outputs
   end
 
   def request_guess
-    @message = 'Enter a valid whole number between 0 and 100...'
+    @message = 'Enter a VALID whole number between 0 and 100...'
   end
 
   def correct_guess(guess)
@@ -101,7 +112,7 @@ class OutputMessages
     @message = "#{guess}? Too low. Try again."
   end
 
-  def error_message
+  def game_error_message
     %(You have not started a game, or you have not made any guesses.
       Please start a game by posting to the path '/start_game'.)
   end
@@ -122,7 +133,7 @@ class OutputMessages
 
   def game_info
     @status_code = '200 OK'
-    @message     = error_message if @game_count.zero?
+    @message     = game_error_message if @game_count.zero?
     @message     = "You have made #{@game_count} guesses."
     client_outputs
   end
