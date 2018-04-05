@@ -41,4 +41,22 @@ class Router
       output.unknown_path_message
     end
   end
+
+  def output_for_post_path
+    if path == '/start_game'
+      output.start_game
+    elsif path == '/game'
+      output.record_guess
+    else
+      output.error_message
+    end
+  end
+
+  def known_post_path
+    if path == '/start_game' || path == '/game'
+      output_for_post_path
+    else
+      output.unknown_path_message
+    end
+  end
 end
