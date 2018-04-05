@@ -28,4 +28,17 @@ class Router
     output.word_search         if path.start_with?('/word_search')
     output.game_info           if path == '/game'
   end
+
+  def known_get_path
+    if path == '/' ||
+       path == '/hello' ||
+       path == '/datetime' ||
+       path == '/shutdown' ||
+       path == '/game' ||
+       path.start_with?('/word_search')
+      output_for_get_path
+    else
+      output.unknown_path_message
+    end
+  end
 end
