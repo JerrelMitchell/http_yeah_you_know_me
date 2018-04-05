@@ -2,15 +2,17 @@ require './lib/game'
 
 class Output
   attr_reader :server, :count, :hello_count, :game_count,
-              :message, :status_code
+              :message, :status_code, :current_time, :dictionary
   def initialize(server)
-    @server      = server
-    @count       = 0
-    @hello_count = 0
-    @game_count  = 0
-    @game        = nil
-    @message     = nil
-    @status_code = nil
+    @server       = server
+    @count        = 0
+    @hello_count  = 0
+    @game_count   = 0
+    @game         = nil
+    @message      = nil
+    @status_code  = nil
+    @current_time = Time.now.strftime('%l:%M%p on %A, %B %-d, %Y.')
+    @dictionary   = File.read('/usr/share/dict/words')
   end
 
   def client_outputs
@@ -34,10 +36,6 @@ class Output
     @hello_count += 1
     @message      = "Hello, World! (#{hello_count})"
     client_outputs
-  end
-
-  def current_time
-    Time.now.strftime('%l:%M%p on %A, %B %-d, %Y.')
   end
 
   def datetime_message
@@ -69,12 +67,8 @@ class Output
     Origin:   #{server.lines[1].split[1].split(':')[0]})
   end
 
-  def dictionary
-    File.read('/usr/share/dict/words')
-  end
-
   def word_error_message
-    'Invalid input. Search by typing in /word_search=your_word_here'
+    "Invalid input. Search by typing in the path '/word_search=your_word_here'"
   end
 
   def word_search(word)
@@ -134,7 +128,7 @@ class Output
   def game_info
     @status_code = '200 OK'
     @message     = game_error_message if @game_count.zero?
-    @message     = "You have made #{@game_count} guesses."
+    @message     = "You've made #{@game_count} guess(es)!"
     client_outputs
   end
 end
